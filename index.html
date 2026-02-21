@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      @font-face {
+        font-family: 'Hind';
+        src: url('Hind.ttf') format('ttf')
+        font-weight: 500;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Hind';
+        src: url('Hind.ttf') format('ttf')
+        font-weight: 600;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'M PLUS 1p';
+        src: url('MPLUS1p-Regular.ttf') format('ttf')
+        font-weight: 400;
+        font-style: normal;
+      }
+      * {
+        font-family: "Hind", "M PLUS 1p", sans-serif;
+        font-size: 16pt;
+      }
+      .heading {
+        background-color: #00254c;
+        color: white;
+        font-size: 24pt;
+        font-weight: 600;
+        padding: 8px 16px;
+        margin-bottom: .2em;
+      }
+      .sub {
+        background-color: #00254c;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: 500;
+        padding: 8px 16px;
+        margin-top: .8em;
+        cursor: pointer;
+      }
+      .sub:hover {
+        background-color: #003366;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 16px;
+        border-radius: 4px;
+        background-color: #f5f5f5;
+        white-space: pre-wrap;
+        font-family: monospace;
+      }
+      .error {
+        background-color: #ffebee;
+        color: #c62828;
+      }
+      .success {
+        background-color: #e8f5e8;
+        color: #2e7d32;
+      }
+      .loading {
+        color: #666;
+        font-style: italic;
+      }
+      .station-info {
+        font-size: 14pt;
+        color: #666;
+        margin-top: 4px;
+      }
+    </style>
+  </head>
+  <body hidden>
+    <div class="heading">MTR Route</div>
+    <form id="routeForm">
+      <label for="src">From: </label><br>
+      <input type="text" id="src" name="src" placeholder="TST / Tsim Sha Tsui / 尖沙咀" autocomplete="off"><br>
+      <label for="dst">To: </label><br>
+      <input type="text" id="dst" name="dst" placeholder="TST / Tsim Sha Tsui / 尖沙咀" autocomplete="off"><br>
+      <input class="sub" type="submit" value="Calculate Route">
+    </form>
+    <div id="result" class="result"></div>
+  </body>
+  <script>
+    document.querySelector('body').hidden = false;
+
+    class PriorityQueue {
+      constructor() {
+        this.values = [];
+      }
+
+      enqueue(node, priority) {
+        this.values.push({ node, priority });
+        this.sort();
+      }
+
+      dequeue() {
+        return this.values.shift();
+      }
+
+      sort() {
+        this.values.sort((a, b) => a.priority - b.priority);
+      }
+
+      isEmpty() {
+        return this.values.length === 0;
+      }
+    }
+
+    class DijkstraAlgorithm {
+      constructor(graph) {
+        this.graph = graph;
+      }
+
+      findShortestPath(start, end) {
+        // Initialize distances object with infinite distances
+        const distances = {};
+        // Track previous node for path reconstruction
+        const previous = {};
+        // Priority queue for nodes to visit
+        const pq = new PriorityQueue();
+        
+        // Set initial distances
+        for (let node in this.graph) {
+          distances[node] = node === start ? 0 : Infinity;
+          previous[node] = null;
+        }
+        
+        // Add start node to priority queue
+        pq.enqueue(start, 0);
+
+        while (!pq.isEmpty()) {
+          const { node: current } = pq.dequeue();
+          
+          // If we reached the destination, we can stop
+          if (current === end) {
+            break;
+          }
+          
+          // Get neighbors of current node
+          const neighbors = this.graph[current];
+          
+          if (neighbors) {
+            for (let neighbor in neighbors) {
+              // Calculate new distance to neighbor
+              const distance = distances[current] + neighbors[neighbor];
+              
+              // If we found a shorter path to neighbor
+              if (distance < distances[neighbor]) {
+                distances[neighbor] = distance;
+                previous[neighbor] = current;
+                pq.enqueue(neighbor, distance);
+              }
+            }
+          }
+        }
+
+        // Reconstruct the shortest path
+        return this.reconstructPath(previous, start, end, distances[end]);
+      }
+
+      reconstructPath(previous, start, end, totalTime) {
+        const path = [];
+        let current = end;
+        
+        while (current !== null) {
+          path.unshift(current);
+          current = previous[current];
+        }
+        
+        // Check if path exists
+        if (path[0] !== start) {
+          return {
+            path: [],
+            totalTime: Infinity,
+            message: `No path found from ${start} to ${end}`
+          };
+        }
+
+        return {
+          path: path,
+          totalTime: totalTime,
+          message: `Shortest path from ${start} to ${end} takes ${totalTime} minutes`
+        };
+      }
+    }
+
+    // Station database for name matching
+    class StationDatabase {
+      constructor() {
+        this.stations = new Map(); // Map station code to full info
+        this.nameIndex = new Map(); // Map lowercase names to station code
+      }
+
+      async loadFromCSV() {
+        try {
+          const response = await fetch('mtr_graph.csv');
+          const csvText = await response.text();
+          this.parseCSV(csvText);
+          console.log(`Loaded ${this.stations.size} stations from CSV`);
+          return true;
+        } catch (error) {
+          console.error('Error loading CSV:', error);
+          return false;
+        }
+      }
+
+      parseCSV(csvText) {
+        const lines = csvText.trim().split('\n');
+        // Skip header line
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          
+          // Parse CSV line (handling quotes)
+          const matches = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g);
+          if (!matches || matches.length < 6) continue;
+          
+          // Clean up the fields (remove quotes)
+          const fields = matches.map(field => field.replace(/^"|"$/g, '').trim());
+          
+          const lineCode = fields[0];
+          const direction = fields[1];
+          const stationCode = fields[2];
+          const stationId = fields[3];
+          const chineseName = fields[4];
+          const englishName = fields[5];
+          
+          // Store station info
+          this.stations.set(stationCode, {
+            code: stationCode,
+            chinese: chineseName,
+            english: englishName,
+            id: stationId,
+            lineCode: lineCode
+          });
+          
+          // Index by lowercase names for searching
+          this.nameIndex.set(stationCode.toLowerCase(), stationCode);
+          this.nameIndex.set(englishName.toLowerCase(), stationCode);
+          this.nameIndex.set(chineseName.toLowerCase(), stationCode);
+        }
+      }
+
+      findStation(input) {
+        if (!input) return null;
+        
+        const normalizedInput = input.toLowerCase().trim();
+        
+        // Direct match in index
+        if (this.nameIndex.has(normalizedInput)) {
+          const code = this.nameIndex.get(normalizedInput);
+          return this.stations.get(code);
+        }
+        
+        // Try partial matching
+        for (let [key, code] of this.nameIndex.entries()) {
+          if (key.includes(normalizedInput) || normalizedInput.includes(key)) {
+            return this.stations.get(code);
+          }
+        }
+        
+        return null;
+      }
+
+      getAllStationCodes() {
+        return Array.from(this.stations.keys());
+      }
+
+      getStationInfo(code) {
+        return this.stations.get(code);
+      }
+    }
+
+    // Main application
+    class MTRRouteApp {
+      constructor() {
+        this.graph = null;
+        this.dijkstra = null;
+        this.stationDB = new StationDatabase();
+        this.resultDiv = document.getElementById('result');
+        this.form = document.getElementById('routeForm');
+        
+        this.form.addEventListener('submit', this.handleSubmit.bind(this));
+      }
+
+      async initialize() {
+        this.showResult('Loading station data...', 'loading');
+        
+        // Load CSV first
+        const csvLoaded = await this.stationDB.loadFromCSV();
+        if (!csvLoaded) {
+          this.showResult('Warning: Station name database could not be loaded. Please use station codes only.', 'error');
+        }
+
+        // Load graph from JSON
+        this.showResult('Loading MTR network...', 'loading');
+        try {
+          const response = await fetch('mtr_graph.json');
+          this.graph = await response.json();
+          this.dijkstra = new DijkstraAlgorithm(this.graph);
+          
+          // Validate graph against station database
+          if (csvLoaded) {
+            const missingStations = [];
+            for (let node in this.graph) {
+              if (!this.stationDB.getStationInfo(node)) {
+                missingStations.push(node);
+              }
+            }
+            if (missingStations.length > 0) {
+              console.log('Stations not found in CSV:', missingStations);
+            }
+          }
+          
+          this.showResult('Ready! Enter start and destination stations.', 'success');
+        } catch (error) {
+          this.showResult('Error loading MTR graph: ' + error.message, 'error');
+        }
+      }
+
+      handleSubmit(event) {
+        event.preventDefault();
+        
+        const srcInput = document.getElementById('src').value;
+        const dstInput = document.getElementById('dst').value;
+        
+        if (!srcInput || !dstInput) {
+          this.showResult('Please enter both start and destination stations.', 'error');
+          return;
+        }
+
+        if (!this.graph || !this.dijkstra) {
+          this.showResult('MTR network not loaded yet. Please wait.', 'error');
+          return;
+        }
+
+        this.calculateRoute(srcInput, dstInput);
+      }
+
+      calculateRoute(srcInput, dstInput) {
+        // Find stations from input
+        const srcStation = this.stationDB.findStation(srcInput);
+        const dstStation = this.stationDB.findStation(dstInput);
+        
+        let srcCode = srcInput.trim().toUpperCase();
+        let dstCode = dstInput.trim().toUpperCase();
+        
+        // If we found stations in DB, use their codes
+        if (srcStation) {
+          srcCode = srcStation.code;
+        }
+        if (dstStation) {
+          dstCode = dstStation.code;
+        }
+        
+        // Validate stations exist in graph
+        if (!this.graph[srcCode]) {
+          const suggestion = this.findSimilarStation(srcInput);
+          this.showResult(
+            `Station "${srcInput}" not found in network.${suggestion ? ' Did you mean: ' + suggestion + '?' : ''}\n` +
+            `Please use a valid station code or name.`,
+            'error'
+          );
+          return;
+        }
+        
+        if (!this.graph[dstCode]) {
+          const suggestion = this.findSimilarStation(dstInput);
+          this.showResult(
+            `Station "${dstInput}" not found in network.${suggestion ? ' Did you mean: ' + suggestion + '?' : ''}\n` +
+            `Please use a valid station code or name.`,
+            'error'
+          );
+          return;
+        }
+
+        // Calculate route
+        const result = this.dijkstra.findShortestPath(srcCode, dstCode);
+        
+        if (result.totalTime === Infinity) {
+          this.showResult(result.message, 'error');
+          return;
+        }
+
+        // Format the result with station names
+        let pathStr = '';
+        for (let i = 0; i < result.path.length; i++) {
+          const code = result.path[i];
+          const station = this.stationDB.getStationInfo(code);
+          if (station) {
+            pathStr += `${code} (${station.english} / ${station.chinese})`;
+          } else {
+            pathStr += code;
+          }
+          if (i < result.path.length - 1) {
+            const time = this.graph[code][result.path[i + 1]];
+            pathStr += ` --${time}min--> `;
+          }
+        }
+
+        const resultText = 
+`${result.message}
+
+Path (${result.path.length - 1} stops, ${result.totalTime} minutes):
+${pathStr}`;
+
+        this.showResult(resultText, 'success');
+      }
+
+      findSimilarStation(input) {
+        const inputLower = input.toLowerCase();
+        const allCodes = this.stationDB.getAllStationCodes();
+        
+        for (let code of allCodes) {
+          if (code.toLowerCase().includes(inputLower) || inputLower.includes(code.toLowerCase())) {
+            return code;
+          }
+          
+          const info = this.stationDB.getStationInfo(code);
+          if (info) {
+            if (info.english.toLowerCase().includes(inputLower) || 
+                info.chinese.toLowerCase().includes(inputLower)) {
+              return code;
+            }
+          }
+        }
+        
+        return null;
+      }
+
+      showResult(message, type) {
+        this.resultDiv.textContent = message;
+        this.resultDiv.className = 'result ' + type;
+      }
+    }
+
+    // Initialize the app when page loads
+    const app = new MTRRouteApp();
+    app.initialize();
+
+    // Add autocomplete/suggestions (optional enhancement)
+    function setupAutocomplete() {
+      // This could be enhanced with a proper autocomplete dropdown
+      const inputs = ['src', 'dst'];
+      inputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', function() {
+          // Simple placeholder for autocomplete
+          // In a production app, you'd show a dropdown with matching stations
+        });
+      });
+    }
+    
+    setupAutocomplete();
+  </script>
+</html>

@@ -1,0 +1,412 @@
+{
+  "AWE": {
+    "AIR": 4
+  },
+  "AIR": {
+    "AWE": 4,
+    "TSY": 10
+  },
+  "TSY": {
+    "AIR": 10,
+    "SUN": 7,
+    "LAK": 3
+  },
+  "KOW": {
+    "HOK": 5,
+    "OLY": 2
+  },
+  "HOK": {
+    "KOW": 5,
+    "CEN": 7
+  },
+  "SUN": {
+    "DIS": 7,
+    "TUC": 7,
+    "TSY": 7
+  },
+  "DIS": {
+    "SUN": 7
+  },
+  "LOW": {
+    "SHS": 5
+  },
+  "LMC": {
+    "SHS": 10
+  },
+  "SHS": {
+    "LOW": 5,
+    "LMC": 10,
+    "FAN": 3
+  },
+  "FAN": {
+    "SHS": 3,
+    "TWO": 6
+  },
+  "TWO": {
+    "FAN": 6,
+    "TAP": 2
+  },
+  "TAP": {
+    "TWO": 2,
+    "UNI": 6
+  },
+  "UNI": {
+    "TAP": 6,
+    "FOT": 4,
+    "RAC": 6
+  },
+  "FOT": {
+    "UNI": 4,
+    "SHT": 3
+  },
+  "RAC": {
+    "SHT": 6,
+    "UNI": 6
+  },
+  "SHT": {
+    "FOT": 3,
+    "RAC": 6,
+    "TAW": 2
+  },
+  "TAW": {
+    "SHT": 2,
+    "KOT": 6,
+    "HIK": 2,
+    "CKT": 5
+  },
+  "KOT": {
+    "TAW": 6,
+    "MKK": 2,
+    "LOF": 2,
+    "SKM": 2
+  },
+  "MKK": {
+    "KOT": 2,
+    "HUH": 6
+  },
+  "HUH": {
+    "MKK": 6,
+    "EXC": 3,
+    "ETS": 3,
+    "HOM": 2
+  },
+  "EXC": {
+    "HUH": 3,
+    "ADM": 1
+  },
+  "ADM": {
+    "EXC": 1,
+    "WAC": 2,
+    "CEN": 3,
+    "TST": 3,
+    "OCP": 4
+  },
+  "CHW": {
+    "HFC": 3
+  },
+  "HFC": {
+    "CHW": 3,
+    "SKW": 2
+  },
+  "SKW": {
+    "HFC": 2,
+    "SWH": 2
+  },
+  "SWH": {
+    "SKW": 2,
+    "TAK": 1
+  },
+  "TAK": {
+    "SWH": 1,
+    "QUB": 2
+  },
+  "QUB": {
+    "TAK": 2,
+    "NOP": 2,
+    "YAT": 3
+  },
+  "NOP": {
+    "QUB": 2,
+    "FOH": 2
+  },
+  "FOH": {
+    "NOP": 2,
+    "TIH": 2
+  },
+  "TIH": {
+    "FOH": 2,
+    "CAB": 2
+  },
+  "CAB": {
+    "TIH": 2,
+    "WAC": 2
+  },
+  "WAC": {
+    "CAB": 2,
+    "ADM": 2
+  },
+  "CEN": {
+    "ADM": 3,
+    "SHW": 2,
+    "HOK": 7
+  },
+  "SHW": {
+    "CEN": 2,
+    "SYP": 3
+  },
+  "SYP": {
+    "SHW": 3,
+    "HKU": 2
+  },
+  "HKU": {
+    "SYP": 2,
+    "KET": 2
+  },
+  "KET": {
+    "HKU": 2
+  },
+  "TIK": {
+    "YAT": 3,
+    "TKO": 2
+  },
+  "YAT": {
+    "TIK": 3,
+    "LAT": 4,
+    "QUB": 3
+  },
+  "LAT": {
+    "YAT": 4,
+    "KWT": 2
+  },
+  "KWT": {
+    "LAT": 2,
+    "NTK": 2
+  },
+  "NTK": {
+    "KWT": 2,
+    "KOB": 1
+  },
+  "KOB": {
+    "NTK": 1,
+    "CHH": 2
+  },
+  "CHH": {
+    "KOB": 2,
+    "DIH": 2
+  },
+  "DIH": {
+    "CHH": 2,
+    "WTS": 2,
+    "KAT": 2,
+    "HIK": 4
+  },
+  "WTS": {
+    "DIH": 2,
+    "LOF": 1
+  },
+  "LOF": {
+    "WTS": 1,
+    "KOT": 2
+  },
+  "SKM": {
+    "KOT": 2,
+    "PRE": 1
+  },
+  "PRE": {
+    "SKM": 1,
+    "MOK": 1,
+    "SSP": 2
+  },
+  "MOK": {
+    "PRE": 1,
+    "YMT": 2
+  },
+  "YMT": {
+    "MOK": 2,
+    "HOM": 3,
+    "JOR": 2
+  },
+  "HOM": {
+    "YMT": 3,
+    "WHA": 2,
+    "HUH": 2,
+    "TKW": 2
+  },
+  "WHA": {
+    "HOM": 2
+  },
+  "TUM": {
+    "SIH": 2
+  },
+  "SIH": {
+    "TUM": 2,
+    "TIS": 5
+  },
+  "TIS": {
+    "SIH": 5,
+    "LOP": 2
+  },
+  "LOP": {
+    "TIS": 2,
+    "YUL": 2
+  },
+  "YUL": {
+    "LOP": 2,
+    "KSR": 4
+  },
+  "KSR": {
+    "YUL": 4,
+    "TWW": 6
+  },
+  "TWW": {
+    "KSR": 6,
+    "MEF": 4
+  },
+  "MEF": {
+    "TWW": 4,
+    "NAC": 2,
+    "LAK": 2,
+    "LCK": 2
+  },
+  "NAC": {
+    "MEF": 2,
+    "AUS": 2,
+    "LAK": 4,
+    "OLY": 2
+  },
+  "AUS": {
+    "NAC": 2,
+    "ETS": 4
+  },
+  "ETS": {
+    "TST": 11,
+    "AUS": 4,
+    "HUH": 3
+  },
+  "TKW": {
+    "HOM": 2,
+    "SUW": 2
+  },
+  "SUW": {
+    "TKW": 2,
+    "KAT": 1
+  },
+  "KAT": {
+    "SUW": 1,
+    "DIH": 2
+  },
+  "HIK": {
+    "DIH": 4,
+    "TAW": 2
+  },
+  "CKT": {
+    "TAW": 5,
+    "STW": 2
+  },
+  "STW": {
+    "CKT": 2,
+    "CIO": 2
+  },
+  "CIO": {
+    "STW": 2,
+    "SHM": 1
+  },
+  "SHM": {
+    "CIO": 1,
+    "TSH": 4
+  },
+  "TSH": {
+    "SHM": 4,
+    "HEO": 2
+  },
+  "HEO": {
+    "TSH": 2,
+    "MOS": 2
+  },
+  "MOS": {
+    "HEO": 2,
+    "WKS": 2
+  },
+  "WKS": {
+    "MOS": 2
+  },
+  "TUC": {
+    "SUN": 7
+  },
+  "LAK": {
+    "TSY": 3,
+    "NAC": 4,
+    "KWF": 3,
+    "MEF": 2
+  },
+  "OLY": {
+    "NAC": 2,
+    "KOW": 2
+  },
+  "POA": {
+    "HAH": 2
+  },
+  "HAH": {
+    "POA": 2,
+    "TKO": 3
+  },
+  "TKO": {
+    "HAH": 3,
+    "TIK": 2,
+    "LHP": 8
+  },
+  "LHP": {
+    "TKO": 8
+  },
+  "TSW": {
+    "TWH": 2
+  },
+  "TWH": {
+    "TSW": 2,
+    "KWH": 2
+  },
+  "KWH": {
+    "TWH": 2,
+    "KWF": 2
+  },
+  "KWF": {
+    "KWH": 2,
+    "LAK": 3
+  },
+  "LCK": {
+    "MEF": 2,
+    "CSW": 2
+  },
+  "CSW": {
+    "LCK": 2,
+    "SSP": 2
+  },
+  "SSP": {
+    "CSW": 2,
+    "PRE": 2
+  },
+  "JOR": {
+    "YMT": 2,
+    "TST": 2
+  },
+  "TST": {
+    "ETS": 11,
+    "JOR": 2,
+    "ADM": 3
+  },
+  "SOH": {
+    "LET": 3
+  },
+  "LET": {
+    "SOH": 3,
+    "WCH": 2
+  },
+  "WCH": {
+    "LET": 2,
+    "OCP": 2
+  },
+  "OCP": {
+    "WCH": 2,
+    "ADM": 4
+  }
+}
