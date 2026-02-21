@@ -3,7 +3,7 @@ Vibe-coded AI slop
 
 ## Fonts
 * [Hind](https://fonts.google.com/specimen/Hind)
-* [M PLUS 1p](https://fonts.google.com/specimen/M+PLUS+1p)
+* [IBM Plex Sans TC](https://github.com/IBM/plex)
 
 ## Sources
 * DeepSeek: Dijkstra's algorithm implementation and result display
