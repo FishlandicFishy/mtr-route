@@ -6,6 +6,7 @@
 "AEL","DT","HOK","44","香港","Hong Kong",5.00
 "DRL","DT","SUN","54","欣澳","Sunny Bay",1.00
 "DRL","DT","DIS","55","迪士尼","Disneyland Resort",2.00
+"EAL","LMC-DT","LMC","78","落馬洲","Lok Ma Chau",1.00
 "EAL","DT","LOW","76","羅湖","Lo Wu",1.00
 "EAL","DT","SHS","75","上水","Sheung Shui",2.00
 "EAL","DT","FAN","74","粉嶺","Fanling",3.00
@@ -13,6 +14,7 @@
 "EAL","DT","TAP","72","大埔墟","Tai Po Market",5.00
 "EAL","DT","UNI","71","大學","University",6.00
 "EAL","DT","FOT","69","火炭","Fo Tan",7.00
+"EAL","RAC-DT","RAC","77","馬場","Racecourse",7.00
 "EAL","DT","SHT","68","沙田","Sha Tin",8.00
 "EAL","DT","TAW","67","大圍","Tai Wai",9.00
 "EAL","DT","KOT","8","九龍塘","Kowloon Tong",10.00
