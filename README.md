@@ -1,2 +1,12 @@
 # mtr-route
-vibe-coded AI slop
+Vibe-coded AI slop
+
+## Fonts
+* [Hind](https://fonts.google.com/specimen/Hind)
+* [M PLUS 1p](https://fonts.google.com/specimen/M+PLUS+1p)
+
+## Sources
+* DeepSeek: Dijkstra's algorithm implementation and result display
+* <https://mtrhk.weebly.com/uploads/7/6/6/2/76621615/time.pdf>: Time estimates
+* <https://www.reddit.com/r/HongKong/comments/34pokh/a_diagram_of_travel_times_on_the_mtr>: Time estimates
+* <https://opendata.mtr.com.hk/data/mtr_lines_and_stations.csv>: Data for MTR lines and stations
