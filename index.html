@@ -134,419 +134,358 @@
     <div id="result" class="result"></div>
   </body>
   <script>
-    document.querySelector('body').hidden = false;
+  document.querySelector('body').hidden = false;
 
-    // Line colors mapping (you can edit these manually)
-    const LINE_COLORS = {
-      'AEL': '#00888A', // Airport Express - Blue
-      'TCL': '#F7943E', // Tung Chung Line - Orange
-      'TML': '#923011', // Tuen Ma Line - Purple
-      'TWL': '#ED1D24', // Tsuen Wan Line - Red
-      'ISL': '#007DC5', // Island Line - Blue
-      'KTL': '#00AB4E', // Kwun Tong Line - Green
-      'EAL': '#53B7E8', // East Rail Line - Purple
-      'SIL': '#BAC429', // South Island Line - Light Blue
-      'TKL': '#7D499D', // Tseung Kwan O Line - Brown
-      'DRL': '#F173AC', // Disneyland Resort Line - Pink
-    };
+  const LINE_COLORS = {
+    'AEL': '#00888A', // Airport Express
+    'TCL': '#F7943E', // Tung Chung Line
+    'TML': '#923011', // Tuen Ma Line
+    'TWL': '#ED1D24', // Tsuen Wan Line
+    'ISL': '#007DC5', // Island Line
+    'KTL': '#00AB4E', // Kwun Tong Line
+    'EAL': '#53B7E8', // East Rail Line
+    'SIL': '#BAC429', // South Island Line
+    'TKL': '#7D499D', // Tseung Kwan O Line
+    'DRL': '#F173AC', // Disneyland Resort Line
+  };
 
-    class PriorityQueue {
-      constructor() {
-        this.values = [];
-      }
-
-      enqueue(node, priority) {
-        this.values.push({ node, priority });
-        this.sort();
-      }
-
-      dequeue() {
-        return this.values.shift();
-      }
-
-      sort() {
-        this.values.sort((a, b) => a.priority - b.priority);
-      }
-
-      isEmpty() {
-        return this.values.length === 0;
-      }
+  class PriorityQueue {
+    constructor() {
+      this.values = [];
     }
 
-    class DijkstraAlgorithm {
-      constructor(graph) {
-        this.graph = graph;
-      }
+    enqueue(node, priority) {
+      this.values.push({ node, priority });
+      this.sort();
+    }
 
-      findShortestPath(start, end) {
-        const distances = {};
-        const previous = {};
-        const pq = new PriorityQueue();
+    dequeue() {
+      return this.values.shift();
+    }
+
+    sort() {
+      this.values.sort((a, b) => a.priority - b.priority);
+    }
+
+    isEmpty() {
+      return this.values.length === 0;
+    }
+  }
+
+  class DijkstraAlgorithm {
+    constructor(graph) {
+      this.graph = graph;
+    }
+
+    findShortestPath(start, end) {
+      const distances = {};
+      const previous = {};
+      const pq = new PriorityQueue();
+      
+      for (let node in this.graph) {
+        distances[node] = node === start ? 0 : Infinity;
+        previous[node] = null;
+      }
+      
+      pq.enqueue(start, 0);
+
+      while (!pq.isEmpty()) {
+        const { node: current } = pq.dequeue();
         
-        for (let node in this.graph) {
-          distances[node] = node === start ? 0 : Infinity;
-          previous[node] = null;
+        if (current === end) {
+          break;
         }
         
-        pq.enqueue(start, 0);
-
-        while (!pq.isEmpty()) {
-          const { node: current } = pq.dequeue();
-          
-          if (current === end) {
-            break;
-          }
-          
-          const neighbors = this.graph[current];
-          
-          if (neighbors) {
-            for (let neighbor in neighbors) {
-              const distance = distances[current] + neighbors[neighbor];
-              
-              if (distance < distances[neighbor]) {
-                distances[neighbor] = distance;
-                previous[neighbor] = current;
-                pq.enqueue(neighbor, distance);
-              }
+        const neighbors = this.graph[current];
+        
+        if (neighbors) {
+          for (let neighbor in neighbors) {
+            const distance = distances[current] + neighbors[neighbor];
+            
+            if (distance < distances[neighbor]) {
+              distances[neighbor] = distance;
+              previous[neighbor] = current;
+              pq.enqueue(neighbor, distance);
             }
           }
         }
-
-        return this.reconstructPath(previous, start, end, distances[end]);
       }
 
-      reconstructPath(previous, start, end, totalTime) {
-        const path = [];
-        let current = end;
-        
-        while (current !== null) {
-          path.unshift(current);
-          current = previous[current];
-        }
-        
-        if (path[0] !== start) {
-          return {
-            path: [],
-            totalTime: Infinity,
-            message: `No path found from ${start} to ${end}`
-          };
-        }
+      return this.reconstructPath(previous, start, end, distances[end]);
+    }
 
+    reconstructPath(previous, start, end, totalTime) {
+      const path = [];
+      let current = end;
+      
+      while (current !== null) {
+        path.unshift(current);
+        current = previous[current];
+      }
+      
+      if (path[0] !== start) {
         return {
-          path: path,
-          totalTime: totalTime,
-          message: `Shortest path from ${start} to ${end} takes ${totalTime} minutes`
+          path: [],
+          totalTime: Infinity,
+          message: `No path found from ${start} to ${end}`
         };
       }
+
+      return {
+        path: path,
+        totalTime: totalTime,
+        message: `Shortest path from ${start} to ${end} takes ${totalTime} minutes`
+      };
+    }
+  }
+
+  class StationDatabase {
+    constructor() {
+      this.stations = new Map();
+      this.nameIndex = new Map();
+      this.lineInfo = new Map();
     }
 
-    class StationDatabase {
-      constructor() {
-        this.stations = new Map();
-        this.nameIndex = new Map();
-        this.lineInfo = new Map(); // Store line info for stations
+    async loadFromCSV() {
+      try {
+        const response = await fetch('mtr_graph.csv');
+        const csvText = await response.text();
+        this.parseCSV(csvText);
+        console.log(`Loaded ${this.stations.size} stations from CSV`);
+        return true;
+      } catch (error) {
+        console.error('Error loading CSV:', error);
+        return false;
       }
+    }
 
-      async loadFromCSV() {
-        try {
-          const response = await fetch('mtr_graph.csv');
-          const csvText = await response.text();
-          this.parseCSV(csvText);
-          console.log(`Loaded ${this.stations.size} stations from CSV`);
-          return true;
-        } catch (error) {
-          console.error('Error loading CSV:', error);
-          return false;
+    parseCSV(csvText) {
+      const lines = csvText.trim().split('\n');
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        const matches = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g);
+        if (!matches || matches.length < 6) continue;
+        
+        const fields = matches.map(field => field.replace(/^"|"$/g, '').trim());
+        
+        const lineCode = fields[0];
+        const stationCode = fields[2];
+        const chineseName = fields[4];
+        const englishName = fields[5];
+        
+        this.stations.set(stationCode, {
+          code: stationCode,
+          chinese: chineseName,
+          english: englishName,
+          lines: []
+        });
+        
+        if (!this.lineInfo.has(stationCode)) {
+          this.lineInfo.set(stationCode, new Set());
         }
+        this.lineInfo.get(stationCode).add(lineCode);
+        
+        const station = this.stations.get(stationCode);
+        station.lines = Array.from(this.lineInfo.get(stationCode));
+        
+        this.nameIndex.set(stationCode.toLowerCase(), stationCode);
+        this.nameIndex.set(englishName.toLowerCase(), stationCode);
+        this.nameIndex.set(chineseName.toLowerCase(), stationCode);
       }
+    }
 
-      parseCSV(csvText) {
-        const lines = csvText.trim().split('\n');
-        for (let i = 1; i < lines.length; i++) {
-          const line = lines[i].trim();
-          if (!line) continue;
-          
-          const matches = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g);
-          if (!matches || matches.length < 6) continue;
-          
-          const fields = matches.map(field => field.replace(/^"|"$/g, '').trim());
-          
-          const lineCode = fields[0];
-          const stationCode = fields[2];
-          const chineseName = fields[4];
-          const englishName = fields[5];
-          
-          // Store station info
-          this.stations.set(stationCode, {
-            code: stationCode,
-            chinese: chineseName,
-            english: englishName,
-            lines: []
-          });
-          
-          // Add line info
-          if (!this.lineInfo.has(stationCode)) {
-            this.lineInfo.set(stationCode, new Set());
-          }
-          this.lineInfo.get(stationCode).add(lineCode);
-          
-          // Update station with lines
-          const station = this.stations.get(stationCode);
-          station.lines = Array.from(this.lineInfo.get(stationCode));
-          
-          // Index by names
-          this.nameIndex.set(stationCode.toLowerCase(), stationCode);
-          this.nameIndex.set(englishName.toLowerCase(), stationCode);
-          this.nameIndex.set(chineseName.toLowerCase(), stationCode);
-        }
-      }
-
-      findStation(input) {
-        if (!input) return null;
-        
-        const normalizedInput = input.toLowerCase().trim();
-        
-        if (this.nameIndex.has(normalizedInput)) {
-          const code = this.nameIndex.get(normalizedInput);
-          return this.stations.get(code);
-        }
-        
-        // Try partial matching
-        for (let [key, code] of this.nameIndex.entries()) {
-          if (key.includes(normalizedInput) || normalizedInput.includes(key)) {
-            return this.stations.get(code);
-          }
-        }
-        
-        return null;
-      }
-
-      getStationInfo(code) {
+    findStation(input) {
+      if (!input) return null;
+      
+      const normalizedInput = input.toLowerCase().trim();
+      
+      if (this.nameIndex.has(normalizedInput)) {
+        const code = this.nameIndex.get(normalizedInput);
         return this.stations.get(code);
       }
+      
+      for (let [key, code] of this.nameIndex.entries()) {
+        if (key.includes(normalizedInput) || normalizedInput.includes(key)) {
+          return this.stations.get(code);
+        }
+      }
+      
+      return null;
+    }
 
-      getStationLines(code) {
-        return this.lineInfo.get(code) || new Set();
+    getStationInfo(code) {
+      return this.stations.get(code);
+    }
+
+    getStationLines(code) {
+      return this.lineInfo.get(code) || new Set();
+    }
+  }
+
+  class MTRRouteApp {
+    constructor() {
+      this.graph = null;
+      this.dijkstra = null;
+      this.stationDB = new StationDatabase();
+      this.resultDiv = document.getElementById('result');
+      this.form = document.getElementById('routeForm');
+      
+      this.form.addEventListener('submit', this.handleSubmit.bind(this));
+    }
+
+    async initialize() {
+      this.showResult('Loading station data...', 'loading');
+      
+      const csvLoaded = await this.stationDB.loadFromCSV();
+      if (!csvLoaded) {
+        this.showResult('Warning: Station name database could not be loaded. Using station codes only.', 'error');
+      }
+
+      this.showResult('Loading MTR network...', 'loading');
+      try {
+        const response = await fetch('mtr_graph.json');
+        this.graph = await response.json();
+        this.dijkstra = new DijkstraAlgorithm(this.graph);
+        this.showResult('Ready! Enter start and destination stations.', 'success');
+      } catch (error) {
+        this.showResult('Error loading MTR graph: ' + error.message, 'error');
       }
     }
 
-    class MTRRouteApp {
-      constructor() {
-        this.graph = null;
-        this.dijkstra = null;
-        this.stationDB = new StationDatabase();
-        this.resultDiv = document.getElementById('result');
-        this.form = document.getElementById('routeForm');
-        
-        this.form.addEventListener('submit', this.handleSubmit.bind(this));
+    handleSubmit(event) {
+      event.preventDefault();
+      
+      const srcInput = document.getElementById('src').value;
+      const dstInput = document.getElementById('dst').value;
+      
+      if (!srcInput || !dstInput) {
+        this.showResult('Please enter both start and destination stations.', 'error');
+        return;
       }
 
-      async initialize() {
-        this.showResult('Loading station data...', 'loading');
-        
-        const csvLoaded = await this.stationDB.loadFromCSV();
-        if (!csvLoaded) {
-          this.showResult('Warning: Station name database could not be loaded. Using station codes only.', 'error');
-        }
-
-        this.showResult('Loading MTR network...', 'loading');
-        try {
-          const response = await fetch('mtr_graph.json');
-          this.graph = await response.json();
-          this.dijkstra = new DijkstraAlgorithm(this.graph);
-          this.showResult('Ready! Enter start and destination stations.', 'success');
-        } catch (error) {
-          this.showResult('Error loading MTR graph: ' + error.message, 'error');
-        }
+      if (!this.graph || !this.dijkstra) {
+        this.showResult('MTR network not loaded yet. Please wait.', 'error');
+        return;
       }
 
-      handleSubmit(event) {
-        event.preventDefault();
-        
-        const srcInput = document.getElementById('src').value;
-        const dstInput = document.getElementById('dst').value;
-        
-        if (!srcInput || !dstInput) {
-          this.showResult('Please enter both start and destination stations.', 'error');
-          return;
-        }
+      this.calculateRoute(srcInput, dstInput);
+    }
 
-        if (!this.graph || !this.dijkstra) {
-          this.showResult('MTR network not loaded yet. Please wait.', 'error');
-          return;
-        }
+    getTimeSymbol(minutes) {
+      const timeCircles = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩', '⑪', '⑫', '⑬', '⑭', '⑮', '⑯', '⑰', '⑱', '⑲', '⑳'];
+      return timeCircles[minutes - 1] || minutes;
+    }
 
-        this.calculateRoute(srcInput, dstInput);
+    formatRouteOutput(path, totalTime) {
+      if (path.length < 2) return 'Invalid path';
+      
+      let output = '<div style="font-size: 24px; white-space: nowrap;">';
+      
+      // Add first station with ruby
+      const firstStation = this.stationDB.getStationInfo(path[0]);
+      output += this.formatStationWithRuby(path[0], firstStation);
+      
+      // Track current line for colors
+      let currentLine = this.determineLine(path, 0);
+      
+      // Add each segment
+      for (let i = 1; i < path.length; i++) {
+        const time = this.graph[path[i-1]][path[i]];
+        const nextLine = this.determineLine(path, i);
+        
+        // Add colored dash and time circle
+        output += `<span style="color: ${LINE_COLORS[currentLine] || '#000'};"> ——${this.getTimeSymbol(time)}</span>`;
+        
+        // Add station
+        const station = this.stationDB.getStationInfo(path[i]);
+        output += this.formatStationWithRuby(path[i], station);
+        
+        // Update line if changed
+        if (nextLine !== currentLine) {
+          currentLine = nextLine;
+        }
       }
+      
+      // Add total time
+      output += ` | ${totalTime} min</div>`;
+      
+      return output;
+    }
 
-      getTimeSymbol(minutes) {
-        const timeCircles = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩', '⑪', '⑫', '⑬', '⑭', '⑮', '⑯', '⑰', '⑱', '⑲', '⑳'];
-        return timeCircles[minutes - 1] || minutes;
+    determineLine(path, index) {
+      const station = path[index];
+      const lines = this.stationDB.getStationLines(station);
+      
+      if (index < path.length - 1) {
+        const nextStation = path[index + 1];
+        const nextLines = this.stationDB.getStationLines(nextStation);
+        const commonLines = new Set([...lines].filter(x => nextLines.has(x)));
+        if (commonLines.size > 0) {
+          return Array.from(commonLines)[0];
+        }
       }
+      
+      return Array.from(lines)[0] || 'Unknown';
+    }
 
-      formatRouteOutput(path, totalTime) {
-        if (path.length < 2) return 'Invalid path';
-        
-        let output = '<div class="route-display">';
-        
-        // Track current line to minimize interchange display
-        let currentLine = null;
-        let segmentStations = [];
-        
-        for (let i = 0; i < path.length; i++) {
-          const stationCode = path[i];
-          const station = this.stationDB.getStationInfo(stationCode);
-          const stationLines = this.stationDB.getStationLines(stationCode);
-          
-          // For the first station
-          if (i === 0) {
-            currentLine = this.determineLine(path, i);
-            segmentStations = [stationCode];
-            output += this.formatStationWithRuby(stationCode, station);
-            continue;
-          }
-          
-          const time = this.graph[path[i-1]][stationCode];
-          const nextLine = this.determineLine(path, i);
-          
-          // Check if we're changing lines
-          if (nextLine !== currentLine) {
-            // End current segment and show interchange
-            if (segmentStations.length > 0) {
-              output += this.formatTimeCircles(path, segmentStations, i - 1);
-            }
-            
-            // Show interchange (minimized - just the line change)
-            output += `<span class="interchange">
-              <span class="line-badge" style="background-color: ${LINE_COLORS[currentLine] || '#999'}"></span>
-              <span class="arrow">→</span>
-              <span class="line-badge" style="background-color: ${LINE_COLORS[nextLine] || '#999'}"></span>
-            </span>`;
-            
-            // Start new segment
-            currentLine = nextLine;
-            segmentStations = [path[i-1], stationCode];
-            
-            // Add the interchange station
-            output += this.formatStationWithRuby(stationCode, station);
-          } else {
-            // Same line - just continue
-            segmentStations.push(stationCode);
-            output += this.formatStationWithRuby(stationCode, station);
-          }
-        }
-        
-        // Add final time circles for the last segment
-        if (segmentStations.length > 0) {
-          const lastIndex = path.length - 1;
-          output += this.formatTimeCircles(path, segmentStations, lastIndex);
-        }
-        
-        output += `</div><div style="margin-top: 16px; font-size: 18px; color: #00254c;">
-          <strong>Total: ${totalTime} minutes | ${path.length - 1} stops</strong>
-        </div>`;
-        
-        return output;
-      }
-
-      determineLine(path, index) {
-        // Try to determine which line we're on based on station and neighbors
-        const station = path[index];
-        const lines = this.stationDB.getStationLines(station);
-        
-        if (index < path.length - 1) {
-          const nextStation = path[index + 1];
-          // Check if this station and next share a line
-          const nextLines = this.stationDB.getStationLines(nextStation);
-          const commonLines = new Set([...lines].filter(x => nextLines.has(x)));
-          if (commonLines.size > 0) {
-            return Array.from(commonLines)[0];
-          }
-        }
-        
-        return Array.from(lines)[0] || 'Unknown';
-      }
-
-      formatTimeCircles(path, segmentStations, endIndex) {
-        if (segmentStations.length < 2) return '';
-        
-        let result = ' <span class="time-circle">';
-        for (let i = 0; i < segmentStations.length - 1; i++) {
-          const stationIndex = path.indexOf(segmentStations[i]);
-          if (stationIndex < path.length - 1) {
-            const time = this.graph[path[stationIndex]][path[stationIndex + 1]];
-            result += this.getTimeSymbol(time);
-          }
-        }
-        result += ` | ${this.calculateSegmentTime(segmentStations, path)} min</span>`;
-        return result;
-      }
-
-      calculateSegmentTime(segmentStations, fullPath) {
-        let total = 0;
-        for (let i = 0; i < segmentStations.length - 1; i++) {
-          const stationIndex = fullPath.indexOf(segmentStations[i]);
-          if (stationIndex < fullPath.length - 1) {
-            total += this.graph[fullPath[stationIndex]][fullPath[stationIndex + 1]];
-          }
-        }
-        return total;
-      }
-
-      formatStationWithRuby(code, station) {
-        if (!station) {
-          return `<span class="station-ruby">
-            <span class="main-text">${code}</span>
-          </span>`;
-        }
-        
-        return `<span class="station-ruby">
-          <span class="ruby-text">${station.english}</span>
-          <span class="main-text">${code}</span>
-          <span class="ruby-text">${station.chinese}</span>
+    formatStationWithRuby(code, station) {
+      if (!station) {
+        return `<span style="display: inline-flex; flex-direction: column; align-items: center; margin: 0 2px; vertical-align: middle;">
+          <span style="font-size: 12px; color: #666;">&nbsp;</span>
+          <span style="font-size: 24px; font-weight: bold;">${code}</span>
+          <span style="font-size: 12px; color: #666;">&nbsp;</span>
         </span>`;
       }
-
-      calculateRoute(srcInput, dstInput) {
-        const srcStation = this.stationDB.findStation(srcInput);
-        const dstStation = this.stationDB.findStation(dstInput);
-        
-        let srcCode = srcInput.trim().toUpperCase();
-        let dstCode = dstInput.trim().toUpperCase();
-        
-        if (srcStation) srcCode = srcStation.code;
-        if (dstStation) dstCode = dstStation.code;
-        
-        if (!this.graph[srcCode]) {
-          this.showResult(`Station "${srcInput}" not found in network.`, 'error');
-          return;
-        }
-        
-        if (!this.graph[dstCode]) {
-          this.showResult(`Station "${dstInput}" not found in network.`, 'error');
-          return;
-        }
-
-        const result = this.dijkstra.findShortestPath(srcCode, dstCode);
-        
-        if (result.totalTime === Infinity) {
-          this.showResult(result.message, 'error');
-          return;
-        }
-
-        const formattedOutput = this.formatRouteOutput(result.path, result.totalTime);
-        
-        this.resultDiv.innerHTML = formattedOutput;
-        this.resultDiv.className = 'result success';
-      }
-
-      showResult(message, type) {
-        this.resultDiv.innerHTML = message;
-        this.resultDiv.className = 'result ' + type;
-      }
+      
+      return `<span style="display: inline-flex; flex-direction: column; align-items: center; margin: 0 2px; vertical-align: middle;">
+        <span style="font-size: 12px; color: #666; line-height: 1.2;">${station.english}</span>
+        <span style="font-size: 24px; font-weight: bold;">${code}</span>
+        <span style="font-size: 12px; color: #666; line-height: 1.2;">${station.chinese}</span>
+      </span>`;
     }
 
-    const app = new MTRRouteApp();
-    app.initialize();
-  </script>
+    calculateRoute(srcInput, dstInput) {
+      const srcStation = this.stationDB.findStation(srcInput);
+      const dstStation = this.stationDB.findStation(dstInput);
+      
+      let srcCode = srcInput.trim().toUpperCase();
+      let dstCode = dstInput.trim().toUpperCase();
+      
+      if (srcStation) srcCode = srcStation.code;
+      if (dstStation) dstCode = dstStation.code;
+      
+      if (!this.graph[srcCode]) {
+        this.showResult(`Station "${srcInput}" not found in network.`, 'error');
+        return;
+      }
+      
+      if (!this.graph[dstCode]) {
+        this.showResult(`Station "${dstInput}" not found in network.`, 'error');
+        return;
+      }
+
+      const result = this.dijkstra.findShortestPath(srcCode, dstCode);
+      
+      if (result.totalTime === Infinity) {
+        this.showResult(result.message, 'error');
+        return;
+      }
+
+      const formattedOutput = this.formatRouteOutput(result.path, result.totalTime);
+      
+      this.resultDiv.innerHTML = formattedOutput;
+      this.resultDiv.className = 'result success';
+    }
+
+    showResult(message, type) {
+      this.resultDiv.innerHTML = message;
+      this.resultDiv.className = 'result ' + type;
+    }
+  }
+
+  const app = new MTRRouteApp();
+  app.initialize();
+</script>
 </html>
