@@ -1,2 +1,2 @@
 # mtr-route
- vibe-coded
+vibe-coded AI slop
