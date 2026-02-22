@@ -1,5 +1,5 @@
 # mtr-route
-Vibe-coded AI slop
+vibe-coded AI slop (you're better off using MTR Mobile or something)
 
 ## Fonts
 * [Hind](https://fonts.google.com/specimen/Hind)
